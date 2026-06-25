@@ -1,19 +1,16 @@
 "use client";
 
 import { StudioFullPreview } from "@/components/studio/StudioFullPreview";
+import { ThemePicker } from "@/components/studio/ThemePicker";
 import { Button } from "@/components/ui/Button";
 import {
   blockDefinitions,
-  borderRadiusPresets,
   fontPairings,
   industries,
   pageOptions,
-  palettePresets,
   stylePresets,
   type BlockId,
-  type BorderRadiusId,
   type FontPairingId,
-  type PaletteId,
 } from "@/lib/design-tokens";
 import { useStudioStore } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
@@ -23,6 +20,7 @@ import {
   Copy,
   Download,
   Layout,
+  LayoutGrid,
   Monitor,
   Palette,
   Smartphone,
@@ -30,9 +28,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-type TabId = "brand" | "style" | "blocks" | "pages" | "brief";
+type TabId = "themes" | "brand" | "style" | "blocks" | "pages" | "brief";
 
 const tabs: { id: TabId; label: string; icon: typeof Palette }[] = [
+  { id: "themes", label: "Теми", icon: LayoutGrid },
   { id: "brand", label: "Бренд", icon: Type },
   { id: "style", label: "Стиль", icon: Palette },
   { id: "blocks", label: "Блоки", icon: Layout },
@@ -41,7 +40,7 @@ const tabs: { id: TabId; label: string; icon: typeof Palette }[] = [
 ];
 
 export function StudioBuilder() {
-  const [activeTab, setActiveTab] = useState<TabId>("brand");
+  const [activeTab, setActiveTab] = useState<TabId>("themes");
   const [copied, setCopied] = useState(false);
 
   const store = useStudioStore();
@@ -64,9 +63,9 @@ export function StudioBuilder() {
   };
 
   return (
-    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col lg:min-h-[calc(100dvh-4rem)] lg:flex-row">
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col sm:min-h-[calc(100dvh-4rem)] lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] lg:flex-row lg:overflow-hidden">
       {/* Sidebar */}
-      <aside className="flex w-full max-h-[55dvh] flex-col border-b border-border bg-surface/40 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:border-b-0 lg:border-r">
+      <aside className="flex max-h-[45dvh] min-h-0 w-full shrink-0 flex-col overflow-hidden border-b border-border bg-surface/40 lg:max-h-none lg:h-full lg:w-[400px] lg:border-b-0 lg:border-r xl:w-[420px]">
         <div className="border-b border-border px-5 py-5">
           <p className="text-xs font-medium uppercase tracking-widest text-accent">
             Cloud Studio
@@ -95,7 +94,7 @@ export function StudioBuilder() {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -105,6 +104,8 @@ export function StudioBuilder() {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
+              {activeTab === "themes" && <ThemePicker />}
+
               {activeTab === "brand" && (
                 <>
                   <div className="space-y-2">
@@ -169,47 +170,6 @@ export function StudioBuilder() {
 
                   <fieldset className="space-y-3">
                     <legend className="text-sm font-medium">
-                      Палітра ({Object.keys(palettePresets).length} тем)
-                    </legend>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(Object.keys(palettePresets) as PaletteId[]).map((id) => {
-                        const p = palettePresets[id];
-                        return (
-                          <button
-                            key={id}
-                            type="button"
-                            onClick={() => store.setPalette(id)}
-                            className={cn(
-                              "flex items-center gap-2 rounded-xl border p-3 text-left transition-all",
-                              store.palette === id
-                                ? "border-accent bg-accent/5"
-                                : "border-border hover:border-muted",
-                            )}
-                          >
-                            <span className="flex shrink-0 flex-col gap-1">
-                              <span
-                                className="h-3 w-8 rounded"
-                                style={{ background: p.accent }}
-                              />
-                              <span
-                                className="h-3 w-8 rounded"
-                                style={{
-                                  background: p.bg,
-                                  border: `1px solid ${p.muted}44`,
-                                }}
-                              />
-                            </span>
-                            <span className="text-[10px] font-medium leading-tight">
-                              {p.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </fieldset>
-
-                  <fieldset className="space-y-3">
-                    <legend className="text-sm font-medium">
                       Шрифти ({Object.keys(fontPairings).length} пар)
                     </legend>
                     <div className="space-y-2">
@@ -229,30 +189,6 @@ export function StudioBuilder() {
                           }}
                         >
                           {fontPairings[id].label}
-                        </button>
-                      ))}
-                    </div>
-                  </fieldset>
-
-                  <fieldset className="space-y-3">
-                    <legend className="text-sm font-medium">Заокруглення</legend>
-                    <div className="flex flex-wrap gap-2">
-                      {borderRadiusPresets.map((r) => (
-                        <button
-                          key={r.id}
-                          type="button"
-                          onClick={() =>
-                            store.setBorderRadius(r.id as BorderRadiusId)
-                          }
-                          className={cn(
-                            "border px-4 py-2 text-xs transition-all",
-                            store.borderRadius === r.id
-                              ? "border-accent bg-accent/10 text-accent"
-                              : "border-border text-muted",
-                          )}
-                          style={{ borderRadius: r.value }}
-                        >
-                          {r.label}
                         </button>
                       ))}
                     </div>
@@ -367,9 +303,9 @@ export function StudioBuilder() {
         </div>
       </aside>
 
-      {/* Preview panel */}
-      <div className="flex flex-1 flex-col bg-background">
-        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+      {/* Preview */}
+      <div className="flex min-h-[50dvh] flex-1 flex-col lg:min-h-0 lg:overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3">
           <p className="text-xs font-medium uppercase tracking-widest text-muted">
             Live Preview
           </p>
@@ -403,8 +339,10 @@ export function StudioBuilder() {
           </div>
         </div>
 
-        <div className="flex flex-1 items-start justify-center overflow-y-auto p-4 sm:p-8">
-          <StudioFullPreview />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background p-3 sm:p-5 lg:p-6">
+          <div className="mx-auto flex h-full min-h-[420px] w-full max-w-[min(100%,1180px)] flex-col">
+            <StudioFullPreview />
+          </div>
         </div>
       </div>
     </div>

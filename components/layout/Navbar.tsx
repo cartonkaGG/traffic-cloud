@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 
 const homeLinks = [
   { href: "/#services", label: "послуги" },
-  { href: "/#portfolio", label: "портфоліо" },
+  { href: "/#works", label: "роботи" },
+  { href: "/#studio", label: "studio" },
   { href: "/#process", label: "процес" },
   { href: "/#contact", label: "контакт" },
 ];

@@ -141,6 +141,36 @@ export const palettePresets: Record<string, PaletteColors> = {
     accent: "#EF4444",
     accent2: "#F87171",
   },
+  lithos: {
+    id: "lithos",
+    label: "Lithos",
+    bg: "#000000",
+    surface: "#0a0a0a",
+    text: "#ffffff",
+    muted: "#a3a3a3",
+    accent: "#e8702a",
+    accent2: "#d2611f",
+  },
+  jack: {
+    id: "jack",
+    label: "Jack",
+    bg: "#0C0C0C",
+    surface: "#141414",
+    text: "#D7E2EA",
+    muted: "#8a9aa6",
+    accent: "#B600A8",
+    accent2: "#BE4C00",
+  },
+  digitalEpoch: {
+    id: "digital-epoch",
+    label: "Digital Epoch",
+    bg: "#f9fafb",
+    surface: "#ffffff",
+    text: "#0a1b33",
+    muted: "#64748b",
+    accent: "#0a152d",
+    accent2: "#3b82f6",
+  },
 };
 
 export type PaletteId = keyof typeof palettePresets;
@@ -175,6 +205,24 @@ export const fontPairings = {
     label: "Playfair + Jakarta",
     heading: "var(--font-playfair)",
     body: "var(--font-jakarta)",
+  },
+  playfairInter: {
+    id: "playfair-inter",
+    label: "Playfair Display + Inter",
+    heading: "var(--font-playfair)",
+    body: "var(--font-inter)",
+  },
+  kanitKanit: {
+    id: "kanit",
+    label: "Kanit",
+    heading: "var(--font-kanit)",
+    body: "var(--font-kanit)",
+  },
+  outfitInter: {
+    id: "outfit-inter",
+    label: "Outfit + Inter",
+    heading: "var(--font-outfit)",
+    body: "var(--font-inter)",
   },
   soraInter: {
     id: "sora-inter",
@@ -264,3 +312,242 @@ export type BlockId = (typeof blockDefinitions)[number]["id"];
 export function getBorderRadius(id: BorderRadiusId): string {
   return borderRadiusPresets.find((r) => r.id === id)?.value ?? "12px";
 }
+
+export const themeCategories = [
+  "Всі",
+  "Герой",
+  "Лендінг",
+  "Агенція",
+  "SaaS",
+  "Фінтех",
+  "Портфоліо",
+] as const;
+
+export type ThemeCategory = (typeof themeCategories)[number];
+
+export type SiteTheme = {
+  id: string;
+  label: string;
+  category: Exclude<ThemeCategory, "Всі">;
+  description: string;
+  palette: PaletteId;
+  style: StyleId;
+  fonts: FontPairingId;
+  borderRadius: BorderRadiusId;
+  premium?: boolean;
+  template?: "lithos" | "jack" | "digital-epoch";
+};
+
+export const LITHOS_BG_IMAGE_1 =
+  "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_195923_b0ba8ace-1d1d-4f2c-9a28-1ab84b330680.png&w=1280&q=85";
+
+export const LITHOS_BG_IMAGE_2 =
+  "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_201152_bba90a12-bf12-459f-91f0-51f237dbaf3b.png&w=1280&q=85";
+
+export const siteThemes: SiteTheme[] = [
+  {
+    id: "liquid-glass",
+    label: "Рідке скло",
+    category: "Агенція",
+    description: "Скляні панелі, преміум-подача",
+    palette: "midnight",
+    style: "glass",
+    fonts: "syneInter",
+    borderRadius: "round",
+    premium: true,
+  },
+  {
+    id: "golden-portal",
+    label: "Золотий портал",
+    category: "Лендінг",
+    description: "Теплий контраст і золоті акценти",
+    palette: "gold",
+    style: "bold",
+    fonts: "playfairJakarta",
+    borderRadius: "soft",
+    premium: true,
+  },
+  {
+    id: "neon-logic",
+    label: "Неонова логіка",
+    category: "SaaS",
+    description: "Неоновий tech-настрій",
+    palette: "neon",
+    style: "bold",
+    fonts: "clashInter",
+    borderRadius: "sharp",
+  },
+  {
+    id: "securify",
+    label: "Securify Data",
+    category: "SaaS",
+    description: "Мінімалізм для security-продуктів",
+    palette: "slate",
+    style: "minimal",
+    fonts: "spaceDm",
+    borderRadius: "soft",
+  },
+  {
+    id: "aurora-hero",
+    label: "Аврора",
+    category: "Герой",
+    description: "Північне сяйво та gradient glow",
+    palette: "aurora",
+    style: "glass",
+    fonts: "soraInter",
+    borderRadius: "round",
+    premium: true,
+  },
+  {
+    id: "ocean-wave",
+    label: "Океанська хвиля",
+    category: "Герой",
+    description: "Глибокий океан, спокійний вайб",
+    palette: "ocean",
+    style: "minimal",
+    fonts: "outfitManrope",
+    borderRadius: "soft",
+  },
+  {
+    id: "modern-agency",
+    label: "Сучасна агенція",
+    category: "Агенція",
+    description: "Чистий агенційний стиль",
+    palette: "lavender",
+    style: "editorial",
+    fonts: "frauncesSource",
+    borderRadius: "soft",
+  },
+  {
+    id: "finflow",
+    label: "FinFlow",
+    category: "Фінтех",
+    description: "Fintech: довіра та структура",
+    palette: "slate",
+    style: "minimal",
+    fonts: "spaceDm",
+    borderRadius: "sharp",
+    premium: true,
+  },
+  {
+    id: "desert-sand",
+    label: "Пустельний пісок",
+    category: "Лендінг",
+    description: "Світла lifestyle-тема",
+    palette: "sand",
+    style: "editorial",
+    fonts: "libreDm",
+    borderRadius: "round",
+  },
+  {
+    id: "ember-craft",
+    label: "Вогняний craft",
+    category: "Лендінг",
+    description: "Теплий ремісничий стиль",
+    palette: "ember",
+    style: "bold",
+    fonts: "bebasWork",
+    borderRadius: "soft",
+  },
+  {
+    id: "forest-mint",
+    label: "Органічна одіссея",
+    category: "Лендінг",
+    description: "Еко та природні відтінки",
+    palette: "forest",
+    style: "minimal",
+    fonts: "outfitManrope",
+    borderRadius: "round",
+  },
+  {
+    id: "rose-velvet",
+    label: "Bloom",
+    category: "Герой",
+    description: "Мʼякий rose для lifestyle-брендів",
+    palette: "rose",
+    style: "glass",
+    fonts: "playfairJakarta",
+    borderRadius: "pill",
+    premium: true,
+  },
+  {
+    id: "cherry-pop",
+    label: "Вишневий поп",
+    category: "Герой",
+    description: "Сміливий червоний акцент",
+    palette: "cherry",
+    style: "bold",
+    fonts: "bebasWork",
+    borderRadius: "sharp",
+  },
+  {
+    id: "synapse-dark",
+    label: "Synapse Dark",
+    category: "SaaS",
+    description: "Темний UI для AI SaaS",
+    palette: "midnight",
+    style: "minimal",
+    fonts: "clashInter",
+    borderRadius: "soft",
+    premium: true,
+  },
+  {
+    id: "creative-studio",
+    label: "Prisma Creative",
+    category: "Агенція",
+    description: "Креативна студія, editorial",
+    palette: "lavender",
+    style: "editorial",
+    fonts: "frauncesSource",
+    borderRadius: "round",
+  },
+  {
+    id: "lithos",
+    label: "Літос · Геологія",
+    category: "Герой",
+    description: "Spotlight reveal для geology-бренду",
+    palette: "lithos",
+    style: "editorial",
+    fonts: "playfairInter",
+    borderRadius: "pill",
+    premium: true,
+    template: "lithos",
+  },
+  {
+    id: "jack",
+    label: "Джек · 3D креатор",
+    category: "Портфоліо",
+    description: "Портфоліо 3D-креатора з магнітним hero",
+    palette: "jack",
+    style: "bold",
+    fonts: "kanitKanit",
+    borderRadius: "round",
+    premium: true,
+    template: "jack",
+  },
+  {
+    id: "digital-epoch",
+    label: "Цифрова епоха",
+    category: "Лендінг",
+    description: "Відео-hero з плаваючим navbar і marquee",
+    palette: "digitalEpoch",
+    style: "minimal",
+    fonts: "outfitInter",
+    borderRadius: "round",
+    premium: true,
+    template: "digital-epoch",
+  },
+  {
+    id: "wealth-video",
+    label: "Wealth Video",
+    category: "Фінтех",
+    description: "Преміум fintech hero",
+    palette: "gold",
+    style: "glass",
+    fonts: "libreDm",
+    borderRadius: "soft",
+    premium: true,
+  },
+];
+
+export type SiteThemeId = (typeof siteThemes)[number]["id"];

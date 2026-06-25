@@ -1,9 +1,11 @@
 "use client";
 
+import { TemplateThemePreview } from "@/components/studio/TemplateThemePreview";
 import {
   fontPairings,
   getBorderRadius,
   palettePresets,
+  siteThemes,
 } from "@/lib/design-tokens";
 import { useStudioStore } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,7 @@ function BlockWrapper({
 export function StudioFullPreview() {
   const {
     brandName,
+    themeId,
     palette,
     fonts,
     style,
@@ -53,6 +56,17 @@ export function StudioFullPreview() {
     blocks,
     previewDevice,
   } = useStudioStore();
+
+  const themeTemplate = siteThemes.find((t) => t.id === themeId)?.template;
+  const isTemplateTheme = Boolean(themeTemplate);
+
+  if (isTemplateTheme) {
+    return (
+      <div className="flex h-full min-h-0 flex-1 flex-col">
+        <TemplateThemePreview />
+      </div>
+    );
+  }
 
   const colors = palettePresets[palette];
   const fontPair = fontPairings[fonts];

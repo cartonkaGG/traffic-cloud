@@ -8,11 +8,13 @@ import {
   industries,
   pageOptions,
   palettePresets,
+  siteThemes,
   stylePresets,
   type BlockId,
   type BorderRadiusId,
   type FontPairingId,
   type PaletteId,
+  type SiteThemeId,
   type StyleId,
 } from "./design-tokens";
 
@@ -30,6 +32,7 @@ const defaultBlocks = Object.fromEntries(
 interface StudioState {
   brandName: string;
   industry: string;
+  themeId: SiteThemeId;
   style: StyleId;
   palette: PaletteId;
   fonts: FontPairingId;
@@ -40,6 +43,7 @@ interface StudioState {
   previewDevice: PreviewDevice;
   setBrandName: (name: string) => void;
   setIndustry: (industry: string) => void;
+  applyTheme: (themeId: SiteThemeId) => void;
   setStyle: (style: StyleId) => void;
   setPalette: (palette: PaletteId) => void;
   setFonts: (fonts: FontPairingId) => void;
@@ -56,10 +60,11 @@ export const useStudioStore = create<StudioState>()(
     (set, get) => ({
       brandName: "Ваш Бренд",
       industry: industries[0],
-      style: "minimal",
+      themeId: "liquid-glass",
+      style: "glass",
       palette: "midnight",
       fonts: "syneInter",
-      borderRadius: "soft",
+      borderRadius: "round",
       pages: ["Landing", "Про нас", "Контакти"],
       blocks: defaultBlocks,
       brief: "",
@@ -67,6 +72,44 @@ export const useStudioStore = create<StudioState>()(
 
       setBrandName: (brandName) => set({ brandName }),
       setIndustry: (industry) => set({ industry }),
+      applyTheme: (themeId) => {
+        const theme = siteThemes.find((t) => t.id === themeId);
+        if (!theme) return;
+        set({
+          themeId,
+          palette: theme.palette,
+          style: theme.style,
+          fonts: theme.fonts,
+          borderRadius: theme.borderRadius,
+          ...(themeId === "lithos"
+            ? {
+                brandName: "Lithos",
+                industry: "Освіта",
+                pages: [
+                  "Course",
+                  "Field Guides",
+                  "Geology",
+                  "Plans",
+                  "Live Tour",
+                ],
+              }
+            : {}),
+          ...(themeId === "jack"
+            ? {
+                brandName: "Jack",
+                industry: "Портфоліо",
+                pages: ["Про мене", "Ціни", "Проєкти", "Контакт"],
+              }
+            : {}),
+          ...(themeId === "digital-epoch"
+            ? {
+                brandName: "Digital Epoch",
+                industry: "SaaS / Tech",
+                pages: ["Продукти", "Документація", "Контакт"],
+              }
+            : {}),
+        });
+      },
       setStyle: (style) => set({ style }),
       setPalette: (palette) => set({ palette }),
       setFonts: (fonts) => set({ fonts }),
@@ -94,6 +137,8 @@ export const useStudioStore = create<StudioState>()(
           {
             brand: state.brandName,
             industry: state.industry,
+            theme: state.themeId,
+            template: siteThemes.find((t) => t.id === state.themeId)?.template,
             style: state.style,
             borderRadius: radius,
             colors,
@@ -115,6 +160,7 @@ export const useStudioStore = create<StudioState>()(
       partialize: (state) => ({
         brandName: state.brandName,
         industry: state.industry,
+        themeId: state.themeId,
         style: state.style,
         palette: state.palette,
         fonts: state.fonts,

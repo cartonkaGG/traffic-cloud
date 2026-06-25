@@ -1,6 +1,6 @@
 import { Contact } from "@/components/sections/Contact";
 import { Hero } from "@/components/sections/Hero";
-import { Portfolio } from "@/components/sections/Portfolio";
+import { PremiumShowcase } from "@/components/sections/PremiumShowcase";
 import { Process } from "@/components/sections/Process";
 import { Services } from "@/components/sections/Services";
 import { StudioTeaser } from "@/components/sections/StudioTeaser";
@@ -11,8 +11,8 @@ export default function Home() {
     <>
       <Hero />
       <Services />
+      <PremiumShowcase />
       <StudioTeaser />
-      <Portfolio />
       <Process />
       <Contact />
       <HomeFooter />
