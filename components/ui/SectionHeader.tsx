@@ -39,7 +39,7 @@ export function SectionHeader({
       >
         {label}
       </motion.p>
-      <h2 className="hero-title text-3xl font-medium text-white sm:text-4xl md:text-5xl">
+      <h2 className="hero-title text-2xl font-medium text-white sm:text-4xl md:text-5xl">
         {title}
       </h2>
       {description && (

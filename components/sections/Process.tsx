@@ -33,7 +33,7 @@ const steps = [
 
 export function Process() {
   return (
-    <section id="process" className="relative overflow-hidden border-t border-white/10 py-24 sm:py-32">
+    <section id="process" className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32">
       <SectionBackground variant="grid" />
       <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeader
@@ -42,7 +42,7 @@ export function Process() {
           description="прозорі етапи — ви завжди знаєте, що робимо: сайт, бот чи повний стек."
         />
 
-        <div className="relative mt-16">
+        <div className="relative mt-10 sm:mt-16">
           <div className="absolute left-4 top-0 hidden h-full w-px bg-gradient-to-b from-white/20 via-white/10 to-transparent md:left-8 md:block" />
 
           <div className="space-y-8">

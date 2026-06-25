@@ -15,10 +15,10 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" className="relative overflow-hidden border-t border-white/10 py-24 sm:py-32">
+    <section id="contact" className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32">
       <SectionBackground variant="pulse" />
       <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
           <SectionHeader
             label="контакт"
             title="потрібен сайт чи бот?"
@@ -52,7 +52,7 @@ export function Contact() {
                     id="name"
                     name="name"
                     required
-                    className="h-11 w-full rounded-full border border-white/10 bg-black px-4 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
+                    className="h-12 w-full rounded-full border border-white/10 bg-black px-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none sm:h-11 sm:text-sm"
                     placeholder="ваше імʼя"
                   />
                 </div>
@@ -65,7 +65,7 @@ export function Contact() {
                     name="email"
                     type="email"
                     required
-                    className="h-11 w-full rounded-full border border-white/10 bg-black px-4 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
+                    className="h-12 w-full rounded-full border border-white/10 bg-black px-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none sm:h-11 sm:text-sm"
                     placeholder="you@company.com"
                   />
                 </div>
@@ -78,7 +78,7 @@ export function Contact() {
                     name="message"
                     rows={4}
                     required
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
+                    className="w-full resize-none rounded-2xl border border-white/10 bg-black px-4 py-3 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none sm:text-sm"
                     placeholder="сайт, telegram-бот, n8n-воркфлоу, інтеграція crm..."
                   />
                 </div>

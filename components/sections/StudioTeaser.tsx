@@ -25,11 +25,11 @@ export function StudioTeaser() {
   return (
     <section
       id="studio"
-      className="relative overflow-hidden border-t border-white/10 py-24 sm:py-32"
+      className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32"
     >
       <SectionBackground variant="spotlight" />
       <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -51,7 +51,7 @@ export function StudioTeaser() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"
+            className="grid gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-1 xl:grid-cols-3"
           >
             {features.map((f, i) => (
               <motion.div

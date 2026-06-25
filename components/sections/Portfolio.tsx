@@ -34,7 +34,7 @@ const projects = [
 
 export function Portfolio() {
   return (
-    <section id="portfolio" className="relative overflow-hidden border-t border-white/10 py-24 sm:py-32">
+    <section id="portfolio" className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32">
       <SectionBackground variant="mesh" />
       <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeader
@@ -43,7 +43,7 @@ export function Portfolio() {
           description="сайти, боти та автоматизація — реальні кейси для бізнесу."
         />
 
-        <div className="mt-16 grid gap-4 sm:grid-cols-2">
+        <div className="mt-10 grid gap-3 sm:mt-16 sm:grid-cols-2 sm:gap-4">
           {projects.map((project, index) => (
             <motion.article
               key={project.title}
@@ -54,7 +54,7 @@ export function Portfolio() {
               whileHover={{ y: -6, scale: 1.01 }}
               className="group overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-sm"
             >
-              <div className="relative h-52 overflow-hidden">
+              <div className="relative h-44 overflow-hidden sm:h-52">
                 <Image
                   src={project.image}
                   alt={project.title}

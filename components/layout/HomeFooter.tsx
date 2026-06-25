@@ -5,7 +5,7 @@ export function HomeFooter() {
   return (
     <footer className="relative overflow-hidden border-t border-white/10">
       <SectionBackground variant="aurora" />
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-12">
         <div>
           <p className="text-lg font-medium lowercase text-white">
             cloud agency

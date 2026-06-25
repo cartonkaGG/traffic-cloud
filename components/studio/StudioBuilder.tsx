@@ -64,9 +64,9 @@ export function StudioBuilder() {
   };
 
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] flex-col lg:flex-row">
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col lg:min-h-[calc(100dvh-4rem)] lg:flex-row">
       {/* Sidebar */}
-      <aside className="flex w-full flex-col border-b border-border bg-surface/40 lg:w-[400px] lg:shrink-0 lg:border-b-0 lg:border-r">
+      <aside className="flex w-full max-h-[55dvh] flex-col border-b border-border bg-surface/40 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:border-b-0 lg:border-r">
         <div className="border-b border-border px-5 py-5">
           <p className="text-xs font-medium uppercase tracking-widest text-accent">
             Cloud Studio
@@ -76,14 +76,14 @@ export function StudioBuilder() {
           </h1>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto border-b border-border px-3 py-2">
+        <div className="flex gap-1 overflow-x-auto border-b border-border px-3 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
+                "flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
                 activeTab === tab.id
                   ? "bg-accent/10 text-accent"
                   : "text-muted hover:text-foreground",
@@ -403,7 +403,7 @@ export function StudioBuilder() {
           </div>
         </div>
 
-        <div className="flex flex-1 items-start justify-center overflow-y-auto p-5 sm:p-8">
+        <div className="flex flex-1 items-start justify-center overflow-y-auto p-4 sm:p-8">
           <StudioFullPreview />
         </div>
       </div>

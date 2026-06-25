@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function StudioPage() {
   return (
-    <div className="pt-16">
+    <div className="pt-14 sm:pt-16">
       <StudioBuilder />
     </div>
   );

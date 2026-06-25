@@ -34,6 +34,16 @@ body {
   background: #000000;
   color: #ffffff;
   font-family: var(--font-onest), "Onest", system-ui, -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+}
+
+.safe-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
 .hero-title {
@@ -168,6 +178,27 @@ body {
 ::selection {
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .liquid-glass-text__panel {
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+  }
+
+  .hero-glass,
+  .hero-stat {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .hero-glass {
+    padding: 0.875rem 1rem;
+  }
+
+  .hero-stat {
+    padding: 0.625rem 0.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
