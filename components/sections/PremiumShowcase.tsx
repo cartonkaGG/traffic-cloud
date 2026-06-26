@@ -120,18 +120,23 @@ export function PremiumShowcase() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.25 }}
-          className="mt-10 flex flex-col items-center gap-4 sm:mt-12"
+          className="mt-10 flex flex-col items-center gap-4 pb-6 sm:mt-12 sm:pb-0"
         >
           <p className="max-w-md text-center text-xs text-white/45">
             Гортайте картки — це макети живих сайтів. Хочете такий самий рівень для свого
             бізнесу?
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/#contact">
-              <Button>обговорити проєкт</Button>
+          <div
+            data-works-cta
+            className="flex w-full max-w-sm flex-col gap-2 sm:max-w-none sm:flex-row sm:justify-center sm:gap-3"
+          >
+            <Link href="/#contact" className="w-full sm:w-auto">
+              <Button className="w-full">обговорити проєкт</Button>
             </Link>
-            <Link href="/#calculator">
-              <Button variant="secondary">порахувати вартість</Button>
+            <Link href="/#calculator" className="w-full sm:w-auto">
+              <Button variant="secondary" className="w-full">
+                порахувати вартість
+              </Button>
             </Link>
           </div>
         </motion.div>
