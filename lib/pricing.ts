@@ -124,7 +124,7 @@ export const ADDONS: Addon[] = [
     description: "LiqPay, Stripe, Monobank — checkout і webhooks",
     price: 280,
     icon: CreditCard,
-    products: ["mini-app", "ecommerce", "corporate", "landing"],
+    products: ["mini-app", "ecommerce", "corporate"],
   },
   {
     id: "multi-language",
@@ -132,7 +132,7 @@ export const ADDONS: Addon[] = [
     description: "UA / EN / PL — перемикач і переклад контенту",
     price: 220,
     icon: Globe,
-    products: ["landing", "mini-app", "corporate", "ecommerce", "telegram-bot"],
+    products: ["mini-app", "corporate", "ecommerce", "telegram-bot"],
   },
   {
     id: "personal-cabinet",
@@ -164,7 +164,7 @@ export const ADDONS: Addon[] = [
     description: "мета-теги, sitemap, schema, core web vitals",
     price: 180,
     icon: Search,
-    products: ["landing", "corporate", "ecommerce"],
+    products: ["corporate", "ecommerce"],
   },
   {
     id: "crm-integration",
@@ -172,7 +172,7 @@ export const ADDONS: Addon[] = [
     description: "HubSpot, Pipedrive, KeyCRM — синхронізація лідів",
     price: 350,
     icon: Layers,
-    products: ["corporate", "ecommerce", "telegram-bot", "landing"],
+    products: ["corporate", "ecommerce", "telegram-bot"],
   },
   {
     id: "analytics",
@@ -180,7 +180,7 @@ export const ADDONS: Addon[] = [
     description: "GA4, Meta Pixel, дашборд конверсій",
     price: 150,
     icon: BarChart3,
-    products: ["landing", "mini-app", "corporate", "ecommerce", "telegram-bot"],
+    products: ["mini-app", "corporate", "ecommerce", "telegram-bot"],
   },
   {
     id: "admin-panel",
@@ -204,11 +204,12 @@ export const ADDONS: Addon[] = [
     description: "правки, моніторинг, дрібні доопрацювання",
     price: 240,
     icon: Package,
-    products: ["landing", "mini-app", "corporate", "ecommerce", "telegram-bot"],
+    products: ["mini-app", "corporate", "ecommerce", "telegram-bot"],
   },
 ];
 
 export function getAddonsForProduct(productId: ProductId): Addon[] {
+  if (productId === "landing") return [];
   return ADDONS.filter((a) => a.products.includes(productId));
 }
 

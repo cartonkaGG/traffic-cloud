@@ -40,7 +40,7 @@ const STEP_LABELS: Record<Step, string> = {
   3: "контакт",
 };
 
-function AnimatedPrice({ value }: { value: number }) {
+function AnimatedPrice({ value, className }: { value: number; className?: string }) {
   const reduced = useReducedMotion();
   const spring = useSpring(value, { stiffness: 120, damping: 22 });
   const display = useTransform(spring, (v) => formatUsd(Math.round(v)));
@@ -49,19 +49,19 @@ function AnimatedPrice({ value }: { value: number }) {
     spring.set(value);
   }, [spring, value]);
 
-  if (reduced) return <span>{formatUsd(value)}</span>;
-  return <motion.span>{display}</motion.span>;
+  if (reduced) return <span className={className}>{formatUsd(value)}</span>;
+  return <motion.span className={className}>{display}</motion.span>;
 }
 
 function StepIndicator({ step }: { step: Step }) {
   const steps: Step[] = [1, 2, 3];
   return (
-    <div className="mb-8 flex items-center justify-center gap-2 sm:gap-3">
+    <div className="mb-5 flex items-center justify-center gap-1.5 sm:mb-8 sm:gap-3">
       {steps.map((s) => (
-        <div key={s} className="flex items-center gap-2 sm:gap-3">
+        <div key={s} className="flex items-center gap-1.5 sm:gap-3">
           <div
             className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-colors",
+              "flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-medium transition-colors sm:h-8 sm:w-8 sm:text-xs",
               step === s
                 ? "bg-white text-black"
                 : step > s
@@ -69,11 +69,11 @@ function StepIndicator({ step }: { step: Step }) {
                   : "border border-white/20 text-white/40",
             )}
           >
-            {step > s ? <Check className="h-4 w-4" /> : s}
+            {step > s ? <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : s}
           </div>
           <span
             className={cn(
-              "hidden text-xs uppercase tracking-wider sm:inline",
+              "hidden text-xs uppercase tracking-wider md:inline",
               step === s ? "text-white" : "text-white/40",
             )}
           >
@@ -82,11 +82,27 @@ function StepIndicator({ step }: { step: Step }) {
           {s < 3 && (
             <div
               className={cn(
-                "h-px w-6 sm:w-10",
+                "h-px w-4 sm:w-10",
                 step > s ? "bg-white/40" : "bg-white/15",
               )}
             />
           )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SummaryLines({ lines }: { lines: { label: string; price: number }[] }) {
+  return (
+    <div className="space-y-1.5">
+      {lines.map((line) => (
+        <div
+          key={line.label}
+          className="flex items-center justify-between gap-2 text-xs sm:text-sm"
+        >
+          <span className="truncate text-white/65">{line.label}</span>
+          <span className="shrink-0 text-white/90">{formatUsd(line.price)}</span>
         </div>
       ))}
     </div>
@@ -103,8 +119,13 @@ export function PricingCalculator() {
   const [phoneError, setPhoneError] = useState("");
 
   const availableAddons = useMemo(() => getAddonsForProduct(productId), [productId]);
+  const isLanding = productId === "landing";
 
   useEffect(() => {
+    if (productId === "landing") {
+      setAddons(new Set());
+      return;
+    }
     setAddons((prev) => {
       const valid = new Set<AddonId>();
       for (const id of prev) {
@@ -112,7 +133,7 @@ export function PricingCalculator() {
       }
       return valid;
     });
-  }, [availableAddons]);
+  }, [availableAddons, productId]);
 
   const { total, lines } = useMemo(
     () => calculateTotal(productId, addons),
@@ -130,8 +151,10 @@ export function PricingCalculator() {
     });
   };
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const goNext = () => setStep((s) => Math.min(3, s + 1) as Step);
+  const goBack = () => setStep((s) => Math.max(1, s - 1) as Step);
+
+  const submitRequest = () => {
     if (!isValidPhone(phone)) {
       setPhoneError("Введіть коректний номер (мінімум 9 цифр)");
       return;
@@ -140,35 +163,39 @@ export function PricingCalculator() {
     setSubmitted(true);
   };
 
+  const handlePhoneSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitRequest();
+  };
+
   if (submitted) {
     return (
       <section
         id="calculator"
-        className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32"
+        className="relative overflow-hidden border-t border-white/10 py-12 sm:py-24 md:py-32"
       >
         <SectionBackground variant="mesh" />
-        <div className="relative z-10 mx-auto max-w-lg px-5 text-center sm:px-8">
+        <div className="relative z-10 mx-auto max-w-lg px-4 text-center sm:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="rounded-2xl border border-white/15 bg-black/50 p-8 backdrop-blur-xl sm:p-10"
+            className="rounded-2xl border border-white/15 bg-black/50 p-6 backdrop-blur-xl sm:p-10"
           >
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/10">
-              <Check className="h-7 w-7 text-white" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 sm:h-14 sm:w-14">
+              <Check className="h-6 w-6 text-white sm:h-7 sm:w-7" />
             </div>
-            <h3 className="text-xl font-medium text-white">Заявку надіслано</h3>
+            <h3 className="text-lg font-medium text-white sm:text-xl">Заявку надіслано</h3>
             <p className="mt-3 text-sm leading-relaxed text-white/60">
               Менеджер звʼяжеться з вами за номером{" "}
-              <span className="text-white">{phone}</span> протягом робочого дня, щоб
-              уточнити деталі та фінальну вартість проєкту.
+              <span className="text-white">{phone}</span> протягом робочого дня.
             </p>
             <p className="mt-4 text-xs text-white/40">
-              Орієнтовна сума: {formatUsd(total)} · {getPaymentPlanLabel(paymentPlan)}
+              {formatUsd(total)} · {getPaymentPlanLabel(paymentPlan)}
             </p>
             <Button
               type="button"
               variant="secondary"
-              className="mt-6"
+              className="mt-6 w-full sm:w-auto"
               onClick={() => {
                 setSubmitted(false);
                 setStep(1);
@@ -186,37 +213,62 @@ export function PricingCalculator() {
   return (
     <section
       id="calculator"
-      className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32"
+      className="relative overflow-hidden border-t border-white/10 pb-24 pt-12 sm:pb-0 sm:py-24 md:py-32"
     >
       <SectionBackground variant="mesh" />
-      <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-8">
         <SectionHeader
           label="калькулятор"
           title="порахуйте вартість проєкту"
-          description="Оберіть продукт і опції, спосіб оплати — і залиште номер. Менеджер звʼяжеться для уточнення фінальної ціни."
+          description="Оберіть продукт, спосіб оплати — і залиште номер. Менеджер уточнить фінальну ціну."
           align="center"
-          className="mb-6 sm:mb-8"
+          className="mb-4 sm:mb-8"
         />
 
         <StepIndicator step={step} />
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_340px] lg:gap-8 xl:grid-cols-[1fr_380px]">
-          <div className="min-h-[320px]">
+        {/* Mobile compact summary */}
+        <div className="mb-4 rounded-2xl border border-white/15 bg-black/60 p-3.5 backdrop-blur-xl lg:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-widest text-white/45">орієнтовно</p>
+              <AnimatedPrice value={total} className="text-2xl font-medium text-white" />
+              <p className="truncate text-[11px] text-white/50">
+                {selectedProduct.title}
+                {step >= 2 && ` · ${getPaymentPlanLabel(paymentPlan)}`}
+              </p>
+            </div>
+            {step < 3 ? (
+              <Button type="button" className="shrink-0 px-5" onClick={goNext}>
+                далі
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : null}
+          </div>
+          {step === 1 && lines.length > 1 && (
+            <div className="mt-3 border-t border-white/10 pt-3">
+              <SummaryLines lines={lines} />
+            </div>
+          )}
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-[1fr_340px] lg:gap-8 xl:grid-cols-[1fr_380px]">
+          <div className="min-h-[200px]">
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-8"
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-6 sm:space-y-8"
                 >
                   <div>
-                    <p className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-white/45">
+                    <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/45 sm:mb-4">
                       тип проєкту
                     </p>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2.5 min-[400px]:grid-cols-2 sm:gap-3">
                       {BASE_PRODUCTS.map((product) => {
                         const selected = productId === product.id;
                         const Icon = product.icon;
@@ -226,93 +278,108 @@ export function PricingCalculator() {
                             type="button"
                             onClick={() => setProductId(product.id)}
                             className={cn(
-                              "relative rounded-2xl border p-4 text-left transition-colors sm:p-5",
+                              "relative rounded-xl border p-3.5 text-left transition-colors sm:rounded-2xl sm:p-5",
                               selected
                                 ? "border-white/40 bg-white/10"
-                                : "border-white/10 bg-black/40 hover:border-white/20",
+                                : "border-white/10 bg-black/40 active:bg-black/60",
                             )}
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/5">
-                                <Icon className="h-4 w-4 text-white/90" />
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2.5">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 sm:h-9 sm:w-9 sm:rounded-xl">
+                                  <Icon className="h-4 w-4 text-white/90" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-white">{product.title}</p>
+                                  <p className="truncate text-[11px] text-white/50 sm:text-xs">
+                                    {product.subtitle}
+                                  </p>
+                                </div>
                               </div>
                               <span
                                 className={cn(
-                                  "rounded-full px-2 py-0.5 text-xs font-medium",
+                                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium sm:text-xs",
                                   selected ? "bg-white text-black" : "bg-white/10 text-white/70",
                                 )}
                               >
                                 {formatUsd(product.price)}
                               </span>
                             </div>
-                            <p className="mt-3 text-sm font-medium text-white sm:text-base">
-                              {product.title}
-                            </p>
-                            <p className="mt-0.5 text-xs text-white/50">{product.subtitle}</p>
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  <div>
-                    <p className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-white/45">
-                      додаткові опції
-                    </p>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {availableAddons.map((addon) => {
-                        const on = addons.has(addon.id);
-                        const Icon = addon.icon;
-                        return (
-                          <button
-                            key={addon.id}
-                            type="button"
-                            onClick={() => toggleAddon(addon.id)}
-                            className={cn(
-                              "flex items-start gap-3 rounded-xl border p-3.5 text-left sm:p-4",
-                              on
-                                ? "border-white/30 bg-white/8"
-                                : "border-white/8 bg-black/30 hover:border-white/15",
-                            )}
-                          >
-                            <div
+                  {!isLanding && availableAddons.length > 0 && (
+                    <div>
+                      <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/45 sm:mb-4">
+                        додаткові опції
+                      </p>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {availableAddons.map((addon) => {
+                          const on = addons.has(addon.id);
+                          const Icon = addon.icon;
+                          return (
+                            <button
+                              key={addon.id}
+                              type="button"
+                              onClick={() => toggleAddon(addon.id)}
                               className={cn(
-                                "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border",
-                                on ? "border-white bg-white text-black" : "border-white/25",
+                                "flex items-start gap-3 rounded-xl border p-3 text-left sm:p-4",
+                                on
+                                  ? "border-white/30 bg-white/8"
+                                  : "border-white/8 bg-black/30 active:bg-black/50",
                               )}
                             >
-                              {on && <Check className="h-3 w-3" />}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <Icon className="h-3.5 w-3.5 text-white/50" />
-                                <span className="text-sm text-white">{addon.title}</span>
-                                <span className="ml-auto text-xs text-white/45">
-                                  +{formatUsd(addon.price)}
-                                </span>
+                              <div
+                                className={cn(
+                                  "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+                                  on ? "border-white bg-white text-black" : "border-white/25",
+                                )}
+                              >
+                                {on && <Check className="h-3 w-3" />}
                               </div>
-                              <p className="mt-1 text-xs text-white/45">{addon.description}</p>
-                            </div>
-                          </button>
-                        );
-                      })}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Icon className="h-3.5 w-3.5 shrink-0 text-white/50" />
+                                  <span className="text-sm text-white">{addon.title}</span>
+                                  <span className="ml-auto shrink-0 text-xs text-white/45">
+                                    +{formatUsd(addon.price)}
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-[11px] leading-snug text-white/45 sm:text-xs">
+                                  {addon.description}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {isLanding && (
+                    <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/55">
+                      Лендінг — фіксована ціна {formatUsd(100)}. Додаткові опції для цього
+                      формату не потрібні.
+                    </p>
+                  )}
                 </motion.div>
               )}
 
               {step === 2 && (
                 <motion.div
                   key="step2"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.25 }}
                 >
-                  <p className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-white/45">
+                  <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/45 sm:mb-4">
                     спосіб оплати
                   </p>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
                     {PAYMENT_PLANS.map((plan) => {
                       const selected = paymentPlan === plan.id;
                       return (
@@ -321,47 +388,39 @@ export function PricingCalculator() {
                           type="button"
                           onClick={() => setPaymentPlan(plan.id)}
                           className={cn(
-                            "rounded-2xl border p-6 text-left transition-colors",
+                            "rounded-xl border p-4 text-left transition-colors sm:rounded-2xl sm:p-6",
                             selected
                               ? "border-white/40 bg-white/10"
-                              : "border-white/10 bg-black/40 hover:border-white/20",
+                              : "border-white/10 bg-black/40 active:bg-black/60",
                           )}
                         >
-                          <p className="text-lg font-medium text-white">{plan.title}</p>
-                          <p className="mt-2 text-sm leading-relaxed text-white/55">
+                          <p className="text-base font-medium text-white sm:text-lg">
+                            {plan.title}
+                          </p>
+                          <p className="mt-1.5 text-xs leading-relaxed text-white/55 sm:mt-2 sm:text-sm">
                             {plan.description}
                           </p>
-                          {selected && (
-                            <span className="mt-4 inline-flex items-center gap-1 text-xs text-white/70">
-                              <Check className="h-3.5 w-3.5" /> обрано
-                            </span>
-                          )}
                         </button>
                       );
                     })}
                   </div>
-                  <p className="mt-6 text-xs leading-relaxed text-white/40">
-                    Точний графік платежів узгоджуємо з менеджером після брифу. Орієнтовна
-                    сума: {formatUsd(total)}.
-                  </p>
                 </motion.div>
               )}
 
               {step === 3 && (
                 <motion.div
                   key="step3"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.25 }}
                 >
-                  <p className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-white/45">
+                  <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/45 sm:mb-4">
                     ваш номер телефону
                   </p>
-                  <form onSubmit={handlePhoneSubmit} className="max-w-md space-y-4">
+                  <form onSubmit={handlePhoneSubmit} className="space-y-4">
                     <p className="text-sm leading-relaxed text-white/60">
-                      Залиште номер — менеджер передзвонить, щоб обговорити деталі проєкту та
-                      уточнити фінальну вартість.
+                      Менеджер передзвонить, щоб обговорити проєкт і уточнити фінальну вартість.
                     </p>
                     <div className="space-y-2">
                       <label htmlFor="calc-phone" className="text-sm text-white/80">
@@ -372,22 +431,21 @@ export function PricingCalculator() {
                         <input
                           id="calc-phone"
                           type="tel"
+                          inputMode="tel"
                           value={phone}
                           onChange={(e) => {
                             setPhone(e.target.value);
                             setPhoneError("");
                           }}
                           placeholder="+380 XX XXX XX XX"
-                          className="h-12 w-full rounded-full border border-white/10 bg-black pl-11 pr-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none sm:text-sm"
+                          className="h-12 w-full rounded-full border border-white/10 bg-black pl-11 pr-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
                           autoComplete="tel"
                           required
                         />
                       </div>
-                      {phoneError && (
-                        <p className="text-xs text-red-400">{phoneError}</p>
-                      )}
+                      {phoneError && <p className="text-xs text-red-400">{phoneError}</p>}
                     </div>
-                    <Button type="submit" className="w-full sm:w-auto">
+                    <Button type="submit" className="hidden w-full sm:inline-flex sm:w-auto">
                       надіслати заявку
                     </Button>
                   </form>
@@ -396,8 +454,8 @@ export function PricingCalculator() {
             </AnimatePresence>
           </div>
 
-          {/* Summary + navigation */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
+          {/* Desktop summary */}
+          <div className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
             <motion.div
               layout
               className="overflow-hidden rounded-2xl border border-white/15 bg-black/50 backdrop-blur-xl"
@@ -407,9 +465,7 @@ export function PricingCalculator() {
                   <Sparkles className="h-3.5 w-3.5" />
                   орієнтовна сума
                 </div>
-                <p className="mt-2 text-4xl font-medium tracking-tight text-white">
-                  <AnimatedPrice value={total} />
-                </p>
+                <AnimatedPrice value={total} className="mt-2 block text-4xl font-medium text-white" />
                 <p className="mt-1 text-xs text-white/45">
                   {selectedProduct.title}
                   {step >= 2 && ` · ${getPaymentPlanLabel(paymentPlan)}`}
@@ -417,35 +473,18 @@ export function PricingCalculator() {
               </div>
 
               <div className="max-h-[200px] space-y-2 overflow-y-auto px-5 py-4">
-                {lines.map((line) => (
-                  <div
-                    key={line.label}
-                    className="flex items-center justify-between gap-2 text-sm"
-                  >
-                    <span className="truncate text-white/65">{line.label}</span>
-                    <span className="shrink-0 text-white/90">{formatUsd(line.price)}</span>
-                  </div>
-                ))}
+                <SummaryLines lines={lines} />
               </div>
 
               <div className="space-y-2 border-t border-white/10 p-5">
                 {step > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => setStep((s) => (s - 1) as Step)}
-                  >
+                  <Button type="button" variant="ghost" className="w-full" onClick={goBack}>
                     <ArrowLeft className="h-4 w-4" />
                     назад
                   </Button>
                 )}
                 {step < 3 && (
-                  <Button
-                    type="button"
-                    className="w-full"
-                    onClick={() => setStep((s) => (s + 1) as Step)}
-                  >
+                  <Button type="button" className="w-full" onClick={goNext}>
                     далі
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -457,6 +496,37 @@ export function PricingCalculator() {
               Ціни орієнтовні. Фінальну вартість підтверджує менеджер після брифу.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile fixed bottom bar */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-black/90 px-4 py-3 backdrop-blur-xl lg:hidden"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center gap-2">
+          {step > 1 ? (
+            <Button type="button" variant="ghost" className="shrink-0 px-3" onClick={goBack}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          ) : (
+            <div className="w-11 shrink-0" />
+          )}
+
+          <div className="min-w-0 flex-1 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-white/40">разом</p>
+            <AnimatedPrice value={total} className="text-lg font-medium text-white" />
+          </div>
+
+          {step < 3 ? (
+            <Button type="button" className="shrink-0 px-5" onClick={goNext}>
+              далі
+            </Button>
+          ) : (
+            <Button type="button" className="shrink-0 px-4" onClick={submitRequest}>
+              надіслати
+            </Button>
+          )}
         </div>
       </div>
     </section>
