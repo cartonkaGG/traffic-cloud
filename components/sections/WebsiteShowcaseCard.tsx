@@ -93,7 +93,7 @@ export function WebsiteShowcaseCard({
   active: boolean;
 }) {
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-black">
+    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-black touch-pan-y">
       {item.videoSrc ? (
         <video
           autoPlay

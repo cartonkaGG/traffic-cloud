@@ -7,7 +7,7 @@ import {
   useReducedMotion,
   type PanInfo,
 } from "framer-motion";
-import { SquareArrowOutUpRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -59,6 +59,20 @@ function signedOffset(i: number, active: number, len: number, loop: boolean) {
   return Math.abs(alt) < Math.abs(raw) ? alt : raw;
 }
 
+function useTouchUi() {
+  const [touchUi, setTouchUi] = React.useState(false);
+
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+    const update = () => setTouchUi(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return touchUi;
+}
+
 export function CardStack<T extends CardStackItem>({
   items,
   initialIndex = 0,
@@ -85,10 +99,13 @@ export function CardStack<T extends CardStackItem>({
   renderCard,
 }: CardStackProps<T>) {
   const reduceMotion = useReducedMotion();
+  const touchUi = useTouchUi();
   const len = items.length;
 
   const [active, setActive] = React.useState(() => wrapIndex(initialIndex, len));
   const [hovering, setHovering] = React.useState(false);
+  const [touchPaused, setTouchPaused] = React.useState(false);
+  const touchStart = React.useRef<{ x: number; y: number } | null>(null);
 
   React.useEffect(() => {
     setActive((a) => wrapIndex(a, len));
@@ -121,9 +138,36 @@ export function CardStack<T extends CardStackItem>({
     if (e.key === "ArrowRight") next();
   };
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (!t) return;
+    touchStart.current = { x: t.clientX, y: t.clientY };
+    setTouchPaused(true);
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    window.setTimeout(() => setTouchPaused(false), 1200);
+
+    if (!start) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+
+    if (Math.abs(dx) < 48) return;
+    if (Math.abs(dx) < Math.abs(dy) * 1.35) return;
+
+    if (dx > 0) prev();
+    else next();
+  };
+
   React.useEffect(() => {
     if (!autoAdvance || reduceMotion || !len) return;
-    if (pauseOnHover && hovering) return;
+    if (touchUi && touchPaused) return;
+    if (pauseOnHover && hovering && !touchUi) return;
 
     const id = window.setInterval(
       () => {
@@ -143,6 +187,8 @@ export function CardStack<T extends CardStackItem>({
     loop,
     active,
     next,
+    touchUi,
+    touchPaused,
   ]);
 
   if (!len) return null;
@@ -150,6 +196,7 @@ export function CardStack<T extends CardStackItem>({
   const activeItem = items[active]!;
   const activeHref = activeItem.href;
   const isExternal = Boolean(activeHref?.startsWith("http"));
+  const enableDrag = !touchUi && !reduceMotion;
 
   return (
     <div
@@ -158,10 +205,12 @@ export function CardStack<T extends CardStackItem>({
       onMouseLeave={() => setHovering(false)}
     >
       <div
-        className="relative w-full outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        className="relative w-full touch-pan-y overscroll-y-contain outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         style={{ height: Math.max(380, cardHeight + 80) }}
         tabIndex={0}
         onKeyDown={onKeyDown}
+        onTouchStart={touchUi ? onTouchStart : undefined}
+        onTouchEnd={touchUi ? onTouchEnd : undefined}
         role="region"
         aria-label="Галерея робіт"
       >
@@ -194,27 +243,28 @@ export function CardStack<T extends CardStackItem>({
               const rotateX = isActive ? 0 : tiltXDeg;
               const zIndex = 100 - abs;
 
-              const dragProps = isActive
-                ? {
-                    drag: "x" as const,
-                    dragConstraints: { left: 0, right: 0 },
-                    dragElastic: 0.18,
-                    onDragEnd: (_e: unknown, info: PanInfo) => {
-                      if (reduceMotion) return;
-                      const threshold = Math.min(160, cardWidth * 0.22);
-                      if (info.offset.x > threshold || info.velocity.x > 650) prev();
-                      else if (info.offset.x < -threshold || info.velocity.x < -650) next();
-                    },
-                  }
-                : {};
+              const dragProps =
+                enableDrag && isActive
+                  ? {
+                      drag: "x" as const,
+                      dragConstraints: { left: 0, right: 0 },
+                      dragElastic: 0.12,
+                      dragMomentum: false,
+                      onDragEnd: (_e: unknown, info: PanInfo) => {
+                        const threshold = Math.min(160, cardWidth * 0.22);
+                        if (info.offset.x > threshold || info.velocity.x > 650) prev();
+                        else if (info.offset.x < -threshold || info.velocity.x < -650) next();
+                      },
+                    }
+                  : {};
 
               return (
                 <motion.div
                   key={item.id}
                   className={cn(
                     "absolute bottom-0 overflow-hidden rounded-2xl border border-white/15 shadow-2xl",
-                    "will-change-transform select-none",
-                    isActive
+                    touchUi ? "touch-pan-y" : "select-none",
+                    isActive && enableDrag
                       ? "cursor-grab active:cursor-grabbing"
                       : "cursor-pointer",
                   )}
@@ -266,7 +316,19 @@ export function CardStack<T extends CardStackItem>({
       </div>
 
       {showDots ? (
-        <div className="mt-6 flex items-center justify-center gap-3">
+        <div className="mt-5 flex items-center justify-center gap-3 sm:mt-6">
+          {touchUi && (
+            <button
+              type="button"
+              onClick={prev}
+              disabled={!canGoPrev}
+              aria-label="Попередня картка"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition enabled:active:scale-95 disabled:opacity-30 sm:hidden"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+
           <div className="flex items-center gap-2">
             {items.map((it, idx) => {
               const on = idx === active;
@@ -276,7 +338,8 @@ export function CardStack<T extends CardStackItem>({
                   type="button"
                   onClick={() => setActive(idx)}
                   className={cn(
-                    "h-2 w-2 rounded-full transition",
+                    "rounded-full transition",
+                    touchUi ? "h-2.5 w-2.5" : "h-2 w-2",
                     on ? "bg-white" : "bg-white/30 hover:bg-white/50",
                   )}
                   aria-label={`Перейти до ${it.title}`}
@@ -285,12 +348,23 @@ export function CardStack<T extends CardStackItem>({
               );
             })}
           </div>
-          {activeHref ? (
+
+          {touchUi && (
+            <button
+              type="button"
+              onClick={next}
+              disabled={!canGoNext}
+              aria-label="Наступна картка"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition enabled:active:scale-95 disabled:opacity-30 sm:hidden"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
+
+          {activeHref && !touchUi ? (
             <Link
               href={activeHref}
-              {...(isExternal
-                ? { target: "_blank", rel: "noreferrer" }
-                : {})}
+              {...(isExternal ? { target: "_blank", rel: "noreferrer" } : {})}
               className="text-white/50 transition hover:text-white"
               aria-label="Відкрити проєкт"
             >
@@ -299,6 +373,12 @@ export function CardStack<T extends CardStackItem>({
           ) : null}
         </div>
       ) : null}
+
+      {touchUi && (
+        <p className="mt-3 text-center text-[11px] text-white/40 sm:hidden">
+          Свайп вліво/вправо по картці або кнопки · вертикально — скрол сторінки
+        </p>
+      )}
     </div>
   );
 }

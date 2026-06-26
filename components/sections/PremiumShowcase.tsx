@@ -77,7 +77,7 @@ export function PremiumShowcase() {
   return (
     <section
       id="works"
-      className="relative overflow-hidden border-t border-white/10 py-16 sm:py-24 md:py-32"
+      className="relative overflow-x-hidden border-t border-white/10 py-16 sm:py-24 md:py-32"
     >
       <SectionBackground variant="grid" />
       <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
@@ -108,7 +108,6 @@ export function PremiumShowcase() {
             overlap={0.42}
             spreadDeg={dims.width < 400 ? 30 : 42}
             maxVisible={5}
-            className="touch-pan-y"
             renderCard={(item, { active }) => (
               <WebsiteShowcaseCard item={item as ShowcaseWorkItem} active={active} />
             )}
@@ -123,8 +122,8 @@ export function PremiumShowcase() {
           className="mt-10 flex flex-col items-center gap-4 pb-6 sm:mt-12 sm:pb-0"
         >
           <p className="max-w-md text-center text-xs text-white/45">
-            Гортайте картки — це макети живих сайтів. Хочете такий самий рівень для свого
-            бізнесу?
+            Макети живих сайтів. На телефоні — стрілки або свайп по картці; вниз — звичайний
+            скрол сторінки.
           </p>
           <div
             data-works-cta
