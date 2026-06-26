@@ -78,7 +78,7 @@ export const BASE_PRODUCTS: BaseProduct[] = [
   {
     id: "landing",
     title: "Лендінг",
-    subtitle: "односторінковий сайт під рекламу",
+    subtitle: "1 сторінка під рекламу",
     price: 100,
     icon: LayoutTemplate,
     highlights: ["1 сторінка", "форма заявки", "мобільна версія"],
@@ -214,9 +214,13 @@ export function getAddonsForProduct(productId: ProductId): Addon[] {
 }
 
 export function calculateTotal(
-  productId: ProductId,
+  productId: ProductId | null,
   selectedAddons: Set<AddonId>,
 ): { base: number; addons: number; total: number; lines: { label: string; price: number }[] } {
+  if (!productId) {
+    return { base: 0, addons: 0, total: 0, lines: [] };
+  }
+
   const product = BASE_PRODUCTS.find((p) => p.id === productId)!;
   const available = getAddonsForProduct(productId);
   const lines: { label: string; price: number }[] = [

@@ -30,7 +30,7 @@ import {
   Phone,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Step = 1 | 2 | 3;
 
@@ -51,6 +51,21 @@ function AnimatedPrice({ value, className }: { value: number; className?: string
 
   if (reduced) return <span className={className}>{formatUsd(value)}</span>;
   return <motion.span className={className}>{display}</motion.span>;
+}
+
+function TotalPrice({
+  total,
+  hasProduct,
+  className,
+}: {
+  total: number;
+  hasProduct: boolean;
+  className?: string;
+}) {
+  if (!hasProduct) {
+    return <span className={cn(className, "text-white/35")}>—</span>;
+  }
+  return <AnimatedPrice value={total} className={className} />;
 }
 
 function StepIndicator({ step }: { step: Step }) {
@@ -110,15 +125,33 @@ function SummaryLines({ lines }: { lines: { label: string; price: number }[] }) 
 }
 
 export function PricingCalculator() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [calcInView, setCalcInView] = useState(false);
   const [step, setStep] = useState<Step>(1);
-  const [productId, setProductId] = useState<ProductId>("landing");
+  const [productId, setProductId] = useState<ProductId | null>(null);
   const [addons, setAddons] = useState<Set<AddonId>>(new Set());
   const [paymentPlan, setPaymentPlan] = useState<PaymentPlan>("fifty-fifty");
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [phoneError, setPhoneError] = useState("");
 
-  const availableAddons = useMemo(() => getAddonsForProduct(productId), [productId]);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setCalcInView(entry.isIntersecting),
+      { threshold: 0.12, rootMargin: "0px 0px -48px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const hasProduct = productId !== null;
+  const availableAddons = useMemo(
+    () => (productId ? getAddonsForProduct(productId) : []),
+    [productId],
+  );
   const isLanding = productId === "landing";
 
   useEffect(() => {
@@ -140,7 +173,9 @@ export function PricingCalculator() {
     [productId, addons],
   );
 
-  const selectedProduct = BASE_PRODUCTS.find((p) => p.id === productId)!;
+  const selectedProduct = productId
+    ? BASE_PRODUCTS.find((p) => p.id === productId)
+    : undefined;
 
   const toggleAddon = (id: AddonId) => {
     setAddons((prev) => {
@@ -151,7 +186,10 @@ export function PricingCalculator() {
     });
   };
 
-  const goNext = () => setStep((s) => Math.min(3, s + 1) as Step);
+  const goNext = () => {
+    if (step === 1 && !hasProduct) return;
+    setStep((s) => Math.min(3, s + 1) as Step);
+  };
   const goBack = () => setStep((s) => Math.max(1, s - 1) as Step);
 
   const submitRequest = () => {
@@ -199,6 +237,8 @@ export function PricingCalculator() {
               onClick={() => {
                 setSubmitted(false);
                 setStep(1);
+                setProductId(null);
+                setAddons(new Set());
                 setPhone("");
               }}
             >
@@ -212,6 +252,7 @@ export function PricingCalculator() {
 
   return (
     <section
+      ref={sectionRef}
       id="calculator"
       className="relative overflow-hidden border-t border-white/10 pb-24 pt-12 sm:pb-0 sm:py-24 md:py-32"
     >
@@ -232,14 +273,29 @@ export function PricingCalculator() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-widest text-white/45">орієнтовно</p>
-              <AnimatedPrice value={total} className="text-2xl font-medium text-white" />
-              <p className="truncate text-[11px] text-white/50">
-                {selectedProduct.title}
-                {step >= 2 && ` · ${getPaymentPlanLabel(paymentPlan)}`}
+              <TotalPrice
+                total={total}
+                hasProduct={hasProduct}
+                className="text-2xl font-medium text-white"
+              />
+              <p className="text-[11px] text-white/50">
+                {hasProduct ? (
+                  <>
+                    {selectedProduct!.title}
+                    {step >= 2 && ` · ${getPaymentPlanLabel(paymentPlan)}`}
+                  </>
+                ) : (
+                  "оберіть тип проєкту"
+                )}
               </p>
             </div>
             {step < 3 ? (
-              <Button type="button" className="shrink-0 px-5" onClick={goNext}>
+              <Button
+                type="button"
+                className="shrink-0 px-5"
+                onClick={goNext}
+                disabled={step === 1 && !hasProduct}
+              >
                 далі
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -268,7 +324,7 @@ export function PricingCalculator() {
                     <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/45 sm:mb-4">
                       тип проєкту
                     </p>
-                    <div className="grid grid-cols-1 gap-2.5 min-[400px]:grid-cols-2 sm:gap-3">
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
                       {BASE_PRODUCTS.map((product) => {
                         const selected = productId === product.id;
                         const Icon = product.icon;
@@ -278,27 +334,29 @@ export function PricingCalculator() {
                             type="button"
                             onClick={() => setProductId(product.id)}
                             className={cn(
-                              "relative rounded-xl border p-3.5 text-left transition-colors sm:rounded-2xl sm:p-5",
+                              "relative overflow-hidden rounded-xl border p-3.5 text-left transition-colors sm:rounded-2xl sm:p-5",
                               selected
                                 ? "border-white/40 bg-white/10"
                                 : "border-white/10 bg-black/40 active:bg-black/60",
                             )}
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2.5">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex min-w-0 flex-1 items-start gap-2.5">
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 sm:h-9 sm:w-9 sm:rounded-xl">
                                   <Icon className="h-4 w-4 text-white/90" />
                                 </div>
-                                <div className="min-w-0">
-                                  <p className="text-sm font-medium text-white">{product.title}</p>
-                                  <p className="truncate text-[11px] text-white/50 sm:text-xs">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-medium leading-tight text-white">
+                                    {product.title}
+                                  </p>
+                                  <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/50 sm:text-xs">
                                     {product.subtitle}
                                   </p>
                                 </div>
                               </div>
                               <span
                                 className={cn(
-                                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium sm:text-xs",
+                                  "mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium sm:text-xs",
                                   selected ? "bg-white text-black" : "bg-white/10 text-white/70",
                                 )}
                               >
@@ -465,16 +523,28 @@ export function PricingCalculator() {
                   <Sparkles className="h-3.5 w-3.5" />
                   орієнтовна сума
                 </div>
-                <AnimatedPrice value={total} className="mt-2 block text-4xl font-medium text-white" />
+                <TotalPrice
+                  total={total}
+                  hasProduct={hasProduct}
+                  className="mt-2 block text-4xl font-medium text-white"
+                />
                 <p className="mt-1 text-xs text-white/45">
-                  {selectedProduct.title}
-                  {step >= 2 && ` · ${getPaymentPlanLabel(paymentPlan)}`}
+                  {hasProduct ? (
+                    <>
+                      {selectedProduct!.title}
+                      {step >= 2 && ` · ${getPaymentPlanLabel(paymentPlan)}`}
+                    </>
+                  ) : (
+                    "оберіть тип проєкту"
+                  )}
                 </p>
               </div>
 
-              <div className="max-h-[200px] space-y-2 overflow-y-auto px-5 py-4">
-                <SummaryLines lines={lines} />
-              </div>
+              {hasProduct && lines.length > 0 && (
+                <div className="max-h-[200px] space-y-2 overflow-y-auto px-5 py-4">
+                  <SummaryLines lines={lines} />
+                </div>
+              )}
 
               <div className="space-y-2 border-t border-white/10 p-5">
                 {step > 1 && (
@@ -484,7 +554,12 @@ export function PricingCalculator() {
                   </Button>
                 )}
                 {step < 3 && (
-                  <Button type="button" className="w-full" onClick={goNext}>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    onClick={goNext}
+                    disabled={step === 1 && !hasProduct}
+                  >
                     далі
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -499,9 +574,12 @@ export function PricingCalculator() {
         </div>
       </div>
 
-      {/* Mobile fixed bottom bar */}
+      {/* Mobile bottom bar — only while calculator is in view */}
       <div
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-black/90 px-4 py-3 backdrop-blur-xl lg:hidden"
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-black/90 px-4 py-3 backdrop-blur-xl transition-transform duration-300 lg:hidden",
+          calcInView ? "translate-y-0" : "pointer-events-none translate-y-full",
+        )}
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         <div className="flex items-center gap-2">
@@ -515,11 +593,20 @@ export function PricingCalculator() {
 
           <div className="min-w-0 flex-1 text-center">
             <p className="text-[10px] uppercase tracking-wider text-white/40">разом</p>
-            <AnimatedPrice value={total} className="text-lg font-medium text-white" />
+            <TotalPrice
+              total={total}
+              hasProduct={hasProduct}
+              className="text-lg font-medium text-white"
+            />
           </div>
 
           {step < 3 ? (
-            <Button type="button" className="shrink-0 px-5" onClick={goNext}>
+            <Button
+              type="button"
+              className="shrink-0 px-5"
+              onClick={goNext}
+              disabled={step === 1 && !hasProduct}
+            >
               далі
             </Button>
           ) : (
