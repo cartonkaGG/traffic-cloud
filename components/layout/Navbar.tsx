@@ -6,17 +6,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const homeLinks = [
-  { href: "/#services", label: "послуги" },
   { href: "/#works", label: "роботи" },
-  { href: "/#studio", label: "studio" },
-  { href: "/#process", label: "процес" },
+  { href: "/#services", label: "послуги" },
+  { href: "/#calculator", label: "калькулятор" },
   { href: "/#contact", label: "контакт" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const isStudio = pathname === "/studio";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -29,7 +27,7 @@ export function Navbar() {
     <header
       className={cn(
         "sticky top-0 z-50 border-b transition-colors duration-300",
-        scrolled || isStudio
+        scrolled || pathname !== "/"
           ? "border-white/10 bg-black/90 backdrop-blur-xl"
           : "border-transparent bg-black",
       )}
@@ -52,22 +50,13 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/studio"
-            className={cn(
-              "text-sm lowercase transition-colors",
-              isStudio ? "text-white" : "text-white/60 hover:text-white",
-            )}
-          >
-            studio
-          </Link>
         </nav>
 
         <Link
-          href={isStudio ? "/" : "/studio"}
+          href="/#calculator"
           className="rounded-full bg-white px-5 py-2.5 text-sm font-normal lowercase text-black transition-colors hover:bg-neutral-200"
         >
-          {isStudio ? "на головну" : "почати"}
+          порахувати
         </Link>
       </div>
     </header>

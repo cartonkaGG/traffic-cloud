@@ -6,9 +6,8 @@ import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { href: "#works", label: "роботи" },
-  { href: "#studio", label: "studio" },
   { href: "#services", label: "послуги" },
-  { href: "#process", label: "процес" },
+  { href: "#calculator", label: "калькулятор" },
   { href: "#contact", label: "контакт" },
 ];
 
@@ -72,10 +71,10 @@ export function HeroNavbar() {
           </button>
 
           <Link
-            href="/studio"
+            href="#calculator"
             className="rounded-full bg-white px-4 py-2.5 text-sm font-normal text-black shadow-lg transition-colors hover:bg-neutral-200 md:px-6 md:py-3"
           >
-            почати
+            калькулятор
           </Link>
         </div>
       </nav>

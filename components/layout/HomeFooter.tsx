@@ -15,8 +15,8 @@ export function HomeFooter() {
           </p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm lowercase text-white/50">
-          <Link href="/studio" className="transition-colors hover:text-white">
-            studio
+          <Link href="#calculator" className="transition-colors hover:text-white">
+            калькулятор
           </Link>
           <Link href="#contact" className="transition-colors hover:text-white">
             контакт

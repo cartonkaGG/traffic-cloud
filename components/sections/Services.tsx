@@ -2,6 +2,7 @@
 
 import { SectionBackground } from "@/components/effects/SectionBackground";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const services = [
@@ -26,9 +27,9 @@ const services = [
       "gpt-асистенти в ботах, генерація контенту, розумні відповіді та класифікація заявок.",
   },
   {
-    title: "cloud studio",
+    title: "розрахунок вартості",
     description:
-      "клієнт збирає дизайн сайту онлайн — кольори, шрифти, блоки — і надсилає бриф.",
+      "інтерактивний калькулятор — оберіть тип сайту чи бота та опції, отримайте орієнтовну ціну.",
   },
   {
     title: "підтримка & масштаб",
@@ -49,16 +50,26 @@ export function Services() {
         />
 
         <div className="mt-10 grid gap-3 sm:mt-16 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {services.map((service, index) => (
-            <motion.article
+          {services.map((service, index) => {
+            const isCalc = service.title === "розрахунок вартості";
+            const Tag = isCalc ? "a" : "article";
+            return (
+            <motion.div
               key={service.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.4, delay: index * 0.06 }}
               whileHover={{ y: -4, borderColor: "rgba(255,255,255,0.25)" }}
-              className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur-sm transition-colors hover:bg-black/60"
+              className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm transition-colors hover:bg-black/60"
             >
+              <Tag
+                {...(isCalc ? { href: "#calculator" } : {})}
+                className={cn(
+                  "block p-6",
+                  isCalc && "cursor-pointer",
+                )}
+              >
               <div className="mb-4 h-px w-8 bg-white/40" />
               <h3 className="text-lg font-medium lowercase text-white">
                 {service.title}
@@ -66,8 +77,15 @@ export function Services() {
               <p className="mt-2 text-sm leading-relaxed text-white/60">
                 {service.description}
               </p>
-            </motion.article>
-          ))}
+              {isCalc && (
+                <p className="mt-3 text-xs font-medium text-white/80">
+                  перейти до калькулятора →
+                </p>
+              )}
+              </Tag>
+            </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

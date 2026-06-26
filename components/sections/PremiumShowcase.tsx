@@ -21,7 +21,7 @@ const WORKS: ShowcaseWorkItem[] = [
     description:
       "Кінематографічний фон, spotlight-reveal при наведенні, скляна навігація та типографіка під освітні й lifestyle-бренди.",
     imageSrc: LITHOS_BG_IMAGE_1,
-    href: "/studio?theme=lithos",
+    href: "/#contact",
     tag: "лендінг · motion",
     overlay: "lithos",
   },
@@ -31,7 +31,7 @@ const WORKS: ShowcaseWorkItem[] = [
     description:
       "Великий hero з персонажем, marquee проєктів, sticky-картки кейсів і магнітні ефекти — для дизайнерів та 3D-артистів.",
     imageSrc: JACK_MARQUEE_GIFS[12],
-    href: "/studio?theme=jack",
+    href: "/#contact",
     tag: "портфоліо · 3d",
     overlay: "jack",
   },
@@ -43,7 +43,7 @@ const WORKS: ShowcaseWorkItem[] = [
     imageSrc:
       "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80&auto=format&fit=crop",
     videoSrc: DIGITAL_EPOCH_VIDEO,
-    href: "/studio?theme=digital-epoch",
+    href: "/#contact",
     tag: "saas · fintech",
     overlay: "saas",
   },
@@ -130,8 +130,8 @@ export function PremiumShowcase() {
             <Link href="/#contact">
               <Button>обговорити проєкт</Button>
             </Link>
-            <Link href="/studio">
-              <Button variant="secondary">відкрити studio</Button>
+            <Link href="/#calculator">
+              <Button variant="secondary">порахувати вартість</Button>
             </Link>
           </div>
         </motion.div>
