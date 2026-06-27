@@ -80,10 +80,15 @@ export async function POST(request: Request) {
     if (kind === "contact") {
       const name = payload.name?.trim() ?? "";
       const email = payload.email?.trim() ?? "";
+      const phone = payload.phone?.trim() ?? "";
       const message = payload.message?.trim() ?? "";
 
-      if (!name || !email || !message) {
+      if (!name || !email || !phone || !message) {
         return Response.json({ message: "Заповніть усі поля" }, { status: 400 });
+      }
+
+      if (!isValidPhone(phone)) {
+        return Response.json({ message: "Введіть коректний номер телефону" }, { status: 400 });
       }
 
       await sendTelegramMessage(
@@ -94,6 +99,7 @@ export async function POST(request: Request) {
           "<b>Контакт</b>",
           `Імʼя: <b>${escapeHtml(name)}</b>`,
           `Email: <code>${escapeHtml(email)}</code>`,
+          `Телефон: ${escapeHtml(normalizePhone(phone))}`,
           "",
           "<b>Повідомлення:</b>",
           escapeHtml(message),
@@ -132,7 +138,7 @@ export async function POST(request: Request) {
         "Cloud Agency · калькулятор",
         "",
         "<b>Контакт</b>",
-        `Телефон: <code>${escapeHtml(normalizePhone(phone))}</code>`,
+        `Телефон: ${escapeHtml(normalizePhone(phone))}`,
         "",
         "<b>Проєкт</b>",
         `Тип: <b>${escapeHtml(product.title)}</b>`,

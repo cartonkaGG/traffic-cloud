@@ -25,6 +25,7 @@ export function Contact() {
           kind: "contact",
           name: formData.get("name"),
           email: formData.get("email"),
+          phone: formData.get("phone"),
           message: formData.get("message"),
         }),
       });
@@ -99,6 +100,21 @@ export function Contact() {
                     required
                     className="h-12 w-full rounded-full border border-white/10 bg-black px-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none sm:h-11 sm:text-sm"
                     placeholder="you@company.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="text-sm text-white/80">
+                    телефон
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    inputMode="tel"
+                    required
+                    className="h-12 w-full rounded-full border border-white/10 bg-black px-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none sm:h-11 sm:text-sm"
+                    placeholder="+380 XX XXX XX XX"
+                    autoComplete="tel"
                   />
                 </div>
                 <div className="space-y-2">
