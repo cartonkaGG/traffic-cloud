@@ -74,7 +74,7 @@ export function HeroNavbar() {
             href="#calculator"
             className="rounded-full bg-white px-4 py-2.5 text-sm font-normal text-black shadow-lg transition-colors hover:bg-neutral-200 md:px-6 md:py-3"
           >
-            калькулятор
+            замовити сайт
           </Link>
         </div>
       </nav>

@@ -69,7 +69,7 @@ export function MobileCalcFab() {
     >
       <Link
         href="#calculator"
-        aria-label="Перейти до калькулятора вартості"
+        aria-label="Перейти до замовлення сайту"
         className={cn(
           "pointer-events-auto flex max-w-[calc(100vw-2rem)] items-center gap-2.5 rounded-full border border-white/20 bg-black/75 py-2.5 pl-2.5 pr-4 text-white shadow-[0_8px_32px_rgba(0,0,0,0.55)] backdrop-blur-xl",
           "active:scale-[0.97] transition-transform",
@@ -80,7 +80,7 @@ export function MobileCalcFab() {
           <Calculator className="h-4 w-4" strokeWidth={2.25} />
         </span>
         <span className="min-w-0 truncate text-[13px] font-medium leading-none tracking-tight">
-          Калькулятор ціни
+          Замовити сайт
         </span>
       </Link>
     </div>

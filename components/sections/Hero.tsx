@@ -3,6 +3,8 @@
 import { LiquidGlassText } from "@/components/effects/LiquidGlassText";
 import { HeroNavbar } from "@/components/sections/HeroNavbar";
 import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -94,6 +96,21 @@ export function Hero() {
             initial={reduced ? false : "hidden"}
             animate="visible"
             variants={fadeUp}
+          >
+            <Link
+              href="#calculator"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-black shadow-[0_12px_40px_rgba(255,255,255,0.18)] transition-colors active:bg-neutral-200"
+            >
+              замовити сайт
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+
+          <motion.div
+            custom={5}
+            initial={reduced ? false : "hidden"}
+            animate="visible"
+            variants={fadeUp}
             className="grid grid-cols-3 gap-2"
           >
             {stats.map((stat) => (
@@ -156,6 +173,22 @@ export function Hero() {
           initial={reduced ? false : "hidden"}
           animate="visible"
           variants={fadeUp}
+          className="absolute left-10 top-[63%]"
+        >
+          <Link
+            href="#calculator"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-black shadow-[0_16px_48px_rgba(255,255,255,0.16)] transition-colors hover:bg-neutral-200"
+          >
+            замовити сайт
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </motion.div>
+
+        <motion.div
+          custom={5}
+          initial={reduced ? false : "hidden"}
+          animate="visible"
+          variants={fadeUp}
           className="hero-stat absolute right-24 top-[12%]"
         >
           <div className="flex items-center justify-end gap-3">
@@ -166,7 +199,7 @@ export function Hero() {
         </motion.div>
 
         <motion.div
-          custom={5}
+          custom={6}
           initial={reduced ? false : "hidden"}
           animate="visible"
           variants={fadeUp}
@@ -180,7 +213,7 @@ export function Hero() {
         </motion.div>
 
         <motion.div
-          custom={6}
+          custom={7}
           initial={reduced ? false : "hidden"}
           animate="visible"
           variants={fadeUp}
