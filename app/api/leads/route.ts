@@ -35,11 +35,14 @@ function getPaymentDetails(plan: PaymentPlan, total: number) {
   if (plan === "fifty-fifty") {
     const firstPayment = Math.ceil(total / 2);
     const secondPayment = total - firstPayment;
-    return `Перший платіж: ${formatUsd(firstPayment)}\nДругий платіж: ${formatUsd(secondPayment)}`;
+    return [
+      `<b>Перший платіж:</b> ${formatUsd(firstPayment)}`,
+      `<b>Другий платіж:</b> ${formatUsd(secondPayment)}`,
+    ].join("\n");
   }
 
   if (plan === "full") {
-    return `До оплати: ${formatUsd(total)}`;
+    return `<b>До оплати:</b> ${formatUsd(total)}`;
   }
 
   return "Оплата частинами за етапами";
@@ -85,10 +88,12 @@ export async function POST(request: Request) {
 
       await sendTelegramMessage(
         [
-          "<b>Нова заявка з контактної форми</b>",
+          "<b>Нова заявка</b>",
+          "Cloud Agency · контактна форма",
           "",
-          `<b>Імʼя:</b> ${escapeHtml(name)}`,
-          `<b>Email:</b> ${escapeHtml(email)}`,
+          "<b>Контакт</b>",
+          `Імʼя: <b>${escapeHtml(name)}</b>`,
+          `Email: <code>${escapeHtml(email)}</code>`,
           "",
           "<b>Повідомлення:</b>",
           escapeHtml(message),
@@ -118,22 +123,27 @@ export async function POST(request: Request) {
     const { total, lines } = calculateTotal(productId, selectedAddons);
     const product = BASE_PRODUCTS.find((item) => item.id === productId)!;
     const details = lines
-      .map((line) => `• ${escapeHtml(line.label)}: ${formatUsd(line.price)}`)
+      .map((line) => `${escapeHtml(line.label)} — <b>${formatUsd(line.price)}</b>`)
       .join("\n");
 
     await sendTelegramMessage(
       [
-        "<b>Нова заявка з Cloud Agency</b>",
+        "<b>Нова заявка</b>",
+        "Cloud Agency · калькулятор",
         "",
-        `<b>Телефон:</b> ${escapeHtml(normalizePhone(phone))}`,
-        `<b>Проєкт:</b> ${escapeHtml(product.title)}`,
-        `<b>Оплата:</b> ${escapeHtml(getPaymentPlanLabel(paymentPlan))}`,
-        `<b>Сума:</b> ${formatUsd(total)}`,
+        "<b>Контакт</b>",
+        `Телефон: <code>${escapeHtml(normalizePhone(phone))}</code>`,
         "",
-        "<b>Деталі:</b>",
+        "<b>Проєкт</b>",
+        `Тип: <b>${escapeHtml(product.title)}</b>`,
+        `Оплата: ${escapeHtml(getPaymentPlanLabel(paymentPlan))}`,
+        `Сума: <b>${formatUsd(total)}</b>`,
+        "",
+        "<b>Склад замовлення</b>",
         details,
         "",
-        escapeHtml(getPaymentDetails(paymentPlan, total)),
+        "<b>Платежі</b>",
+        getPaymentDetails(paymentPlan, total),
       ].join("\n"),
     );
 
