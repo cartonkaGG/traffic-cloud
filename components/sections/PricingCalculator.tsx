@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import {
   BASE_PRODUCTS,
-  PAYMENT_PLANS,
   calculateTotal,
   formatUsd,
   getAddonsForProduct,
   getPaymentPlanLabel,
+  getPaymentPlansForProduct,
   isValidPhone,
   type AddonId,
   type PaymentPlan,
@@ -133,7 +133,9 @@ export function PricingCalculator() {
   const [paymentPlan, setPaymentPlan] = useState<PaymentPlan>("fifty-fifty");
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [phoneError, setPhoneError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -153,20 +155,10 @@ export function PricingCalculator() {
     [productId],
   );
   const isLanding = productId === "landing";
-
-  useEffect(() => {
-    if (productId === "landing") {
-      setAddons(new Set());
-      return;
-    }
-    setAddons((prev) => {
-      const valid = new Set<AddonId>();
-      for (const id of prev) {
-        if (availableAddons.some((a) => a.id === id)) valid.add(id);
-      }
-      return valid;
-    });
-  }, [availableAddons, productId]);
+  const availablePaymentPlans = useMemo(
+    () => getPaymentPlansForProduct(productId),
+    [productId],
+  );
 
   const { total, lines } = useMemo(
     () => calculateTotal(productId, addons),
@@ -176,6 +168,40 @@ export function PricingCalculator() {
   const selectedProduct = productId
     ? BASE_PRODUCTS.find((p) => p.id === productId)
     : undefined;
+
+  const selectProduct = (nextProductId: ProductId) => {
+    setProductId(nextProductId);
+
+    const nextAddons = getAddonsForProduct(nextProductId);
+    setAddons((prev) => {
+      const valid = new Set<AddonId>();
+      for (const id of prev) {
+        if (nextAddons.some((addon) => addon.id === id)) valid.add(id);
+      }
+      return valid;
+    });
+
+    const nextPaymentPlans = getPaymentPlansForProduct(nextProductId);
+    if (!nextPaymentPlans.some((plan) => plan.id === paymentPlan)) {
+      setPaymentPlan(nextPaymentPlans[0]?.id ?? "fifty-fifty");
+    }
+  };
+
+  const getPaymentPlanAmountLabel = (planId: PaymentPlan) => {
+    if (!hasProduct) return null;
+
+    if (planId === "fifty-fifty") {
+      const firstPayment = Math.ceil(total / 2);
+      const secondPayment = total - firstPayment;
+      return `Перший платіж ${formatUsd(firstPayment)} · другий ${formatUsd(secondPayment)}`;
+    }
+
+    if (planId === "full") {
+      return `До оплати ${formatUsd(total)}`;
+    }
+
+    return null;
+  };
 
   const toggleAddon = (id: AddonId) => {
     setAddons((prev) => {
@@ -192,18 +218,49 @@ export function PricingCalculator() {
   };
   const goBack = () => setStep((s) => Math.max(1, s - 1) as Step);
 
-  const submitRequest = () => {
+  const submitRequest = async () => {
     if (!isValidPhone(phone)) {
       setPhoneError("Введіть коректний номер (мінімум 9 цифр)");
       return;
     }
+    if (!productId) return;
+
     setPhoneError("");
-    setSubmitted(true);
+    setSubmitError("");
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          addons: Array.from(addons),
+          paymentPlan,
+          phone,
+        }),
+      });
+      const data = (await response.json().catch(() => null)) as { message?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(data?.message ?? "Не вдалося надіслати заявку");
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося надіслати заявку. Спробуйте ще раз.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submitRequest();
+    void submitRequest();
   };
 
   if (submitted) {
@@ -240,6 +297,7 @@ export function PricingCalculator() {
                 setProductId(null);
                 setAddons(new Set());
                 setPhone("");
+                setSubmitError("");
               }}
             >
               новий розрахунок
@@ -332,7 +390,7 @@ export function PricingCalculator() {
                           <button
                             key={product.id}
                             type="button"
-                            onClick={() => setProductId(product.id)}
+                            onClick={() => selectProduct(product.id)}
                             className={cn(
                               "relative overflow-hidden rounded-xl border p-3.5 text-left transition-colors sm:rounded-2xl sm:p-5",
                               selected
@@ -438,8 +496,9 @@ export function PricingCalculator() {
                     спосіб оплати
                   </p>
                   <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-                    {PAYMENT_PLANS.map((plan) => {
+                    {availablePaymentPlans.map((plan) => {
                       const selected = paymentPlan === plan.id;
+                      const amountLabel = getPaymentPlanAmountLabel(plan.id);
                       return (
                         <button
                           key={plan.id}
@@ -458,6 +517,11 @@ export function PricingCalculator() {
                           <p className="mt-1.5 text-xs leading-relaxed text-white/55 sm:mt-2 sm:text-sm">
                             {plan.description}
                           </p>
+                          {amountLabel && (
+                            <p className="mt-3 text-xs font-medium text-white/80">
+                              {amountLabel}
+                            </p>
+                          )}
                         </button>
                       );
                     })}
@@ -494,6 +558,7 @@ export function PricingCalculator() {
                           onChange={(e) => {
                             setPhone(e.target.value);
                             setPhoneError("");
+                            setSubmitError("");
                           }}
                           placeholder="+380 XX XXX XX XX"
                           className="h-12 w-full rounded-full border border-white/10 bg-black pl-11 pr-4 text-base text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
@@ -502,9 +567,14 @@ export function PricingCalculator() {
                         />
                       </div>
                       {phoneError && <p className="text-xs text-red-400">{phoneError}</p>}
+                      {submitError && <p className="text-xs text-red-400">{submitError}</p>}
                     </div>
-                    <Button type="submit" className="hidden w-full sm:inline-flex sm:w-auto">
-                      надіслати заявку
+                    <Button
+                      type="submit"
+                      className="hidden w-full sm:inline-flex sm:w-auto"
+                      disabled={submitting}
+                    >
+                      {submitting ? "надсилаємо..." : "надіслати заявку"}
                     </Button>
                   </form>
                 </motion.div>
@@ -610,8 +680,13 @@ export function PricingCalculator() {
               далі
             </Button>
           ) : (
-            <Button type="button" className="shrink-0 px-4" onClick={submitRequest}>
-              надіслати
+            <Button
+              type="button"
+              className="shrink-0 px-4"
+              onClick={() => void submitRequest()}
+              disabled={submitting}
+            >
+              {submitting ? "..." : "надіслати"}
             </Button>
           )}
         </div>

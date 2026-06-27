@@ -37,7 +37,7 @@ export type AddonId =
   | "support-3mo"
   | "automation";
 
-export type PaymentPlan = "fifty-fifty" | "staged";
+export type PaymentPlan = "fifty-fifty" | "full" | "staged";
 
 export type BaseProduct = {
   id: ProductId;
@@ -68,6 +68,11 @@ export const PAYMENT_PLANS: {
     description: "50% перед стартом робіт · 50% після здачі проєкту",
   },
   {
+    id: "full",
+    title: "Повна оплата",
+    description: "100% оплата перед стартом робіт",
+  },
+  {
     id: "staged",
     title: "По етапах",
     description: "Оплата частинами: дизайн → розробка → тестування → запуск",
@@ -78,7 +83,7 @@ export const BASE_PRODUCTS: BaseProduct[] = [
   {
     id: "landing",
     title: "Лендінг",
-    subtitle: "1 сторінка під рекламу",
+    subtitle: "односторінковий сайт",
     price: 100,
     icon: LayoutTemplate,
     highlights: ["1 сторінка", "форма заявки", "мобільна версія"],
@@ -211,6 +216,14 @@ export const ADDONS: Addon[] = [
 export function getAddonsForProduct(productId: ProductId): Addon[] {
   if (productId === "landing") return [];
   return ADDONS.filter((a) => a.products.includes(productId));
+}
+
+export function getPaymentPlansForProduct(productId: ProductId | null) {
+  if (productId === "landing") {
+    return PAYMENT_PLANS.filter((plan) => plan.id !== "staged");
+  }
+
+  return PAYMENT_PLANS.filter((plan) => plan.id !== "full");
 }
 
 export function calculateTotal(

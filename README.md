@@ -26,6 +26,14 @@ npm run build
 npm start
 ```
 
+## Telegram Leads
+
+Заявки з калькулятора відправляються через `/api/leads` у Telegram-чат.
+Для Vercel додайте Environment Variables:
+
+- `TELEGRAM_BOT_TOKEN` — токен бота з BotFather
+- `TELEGRAM_CHAT_ID` — id чату або групи, куди мають приходити заявки
+
 ## Project Structure
 
 ```
